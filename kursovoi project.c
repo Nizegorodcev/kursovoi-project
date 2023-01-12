@@ -23,18 +23,18 @@ ITEM* del(ITEM* point, int, int n);
 void main()
 {
 	system("chcp 1251");
-	ITEM* point = NULL; // объявление БД 
+	ITEM* point = NULL; // РѕР±СЉСЏРІР»РµРЅРёРµ Р‘Р” 
 	int size, v;
 	FILE* f;
 
 	do {
-		printf("Выберите действие:\n1)Ввод данных пользователя.\n2)Поиск по пользователю.\n3)Вывод.\n4)Поиск по времени.\n5)Удаление записи.\n0)Выйти из программы.\n");
+		printf("Р’С‹Р±РµСЂРёС‚Рµ РґРµР№СЃС‚РІРёРµ:\n1)Р’РІРѕРґ РґР°РЅРЅС‹С… РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ.\n2)РџРѕРёСЃРє РїРѕ РїРѕР»СЊР·РѕРІР°С‚РµР»СЋ.\n3)Р’С‹РІРѕРґ.\n4)РџРѕРёСЃРє РїРѕ РІСЂРµРјРµРЅРё.\n5)РЈРґР°Р»РµРЅРёРµ Р·Р°РїРёСЃРё.\n0)Р’С‹Р№С‚Рё РёР· РїСЂРѕРіСЂР°РјРјС‹.\n");
 		scanf("%d", &v);
 
 		switch (v) {
-		case 1: {  /*Добавить запись*/
+		case 1: {  /*Р”РѕР±Р°РІРёС‚СЊ Р·Р°РїРёСЃСЊ*/
 			int n;
-			printf("Введите кол-во записей: ");
+			printf("Р’РІРµРґРёС‚Рµ РєРѕР»-РІРѕ Р·Р°РїРёСЃРµР№: ");
 			scanf("%d", &n);
 
 			f = fopen("KP.txt", "r");
@@ -51,19 +51,19 @@ void main()
 			write(point, size, n, 0);
 			break;
 		}
-		case 2: {  /*Поиск по имени*/
+		case 2: {  /*РџРѕРёСЃРє РїРѕ РёРјРµРЅРё*/
 			char name[100];
 			int ind_res;
-			printf("Укажите имя пользователя: ");
+			printf("РЈРєР°Р¶РёС‚Рµ РёРјСЏ РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ: ");
 			scanf("%s", name);
 
 			ind_res = searchUser(point, name, size);
 			if (ind_res >= 0)put(point, ind_res + 1, ind_res);
-			else printf("Пльзователь не найден.\n");
+			else printf("РџР»СЊР·РѕРІР°С‚РµР»СЊ РЅРµ РЅР°Р№РґРµРЅ.\n");
 			break;
 		}
 
-		case 3: {  /*Вывод данных*/
+		case 3: {  /*Р’С‹РІРѕРґ РґР°РЅРЅС‹С…*/
 			int file_size = 0;
 
 			f = fopen("KP.txt", "r");
@@ -77,11 +77,11 @@ void main()
 			break;
 		}
 
-		case 4: {  /*Поиск по времени*/
+		case 4: {  /*РџРѕРёСЃРє РїРѕ РІСЂРµРјРµРЅРё*/
 
 			int hour, min;
 
-			printf("Укажите время(час:минуты): ");
+			printf("РЈРєР°Р¶РёС‚Рµ РІСЂРµРјСЏ(С‡Р°СЃ:РјРёРЅСѓС‚С‹): ");
 			scanf("%d:%d", &hour, &min);
 			printf("***************************************************************\n");
 
@@ -99,9 +99,9 @@ void main()
 			break;
 		}
 
-		case 5: {   /*Удаление записи*/
+		case 5: {   /*РЈРґР°Р»РµРЅРёРµ Р·Р°РїРёСЃРё*/
 			int index;
-			printf("Выберите строку которую хотите удалить:");
+			printf("Р’С‹Р±РµСЂРёС‚Рµ СЃС‚СЂРѕРєСѓ РєРѕС‚РѕСЂСѓСЋ С…РѕС‚РёС‚Рµ СѓРґР°Р»РёС‚СЊ:");
 			scanf("%d", &index);
 			getchar();
 
@@ -115,7 +115,7 @@ void main()
 			break;
 		}
 
-		case 6: { /* Сортировка*/
+		case 6: { /* РЎРѕСЂС‚РёСЂРѕРІРєР°*/
 
 			break;
 		}
@@ -125,22 +125,22 @@ void main()
 
 int init(ITEM* point, int size, int n) {
 	for (int i = size; i < size + n; i++) {
-		printf("Введите дату: ");
+		printf("Р’РІРµРґРёС‚Рµ РґР°С‚Сѓ: ");
 		scanf("%d.%d.%d", &point[i].data[0], &point[i].data[1], &point[i].data[2]);
-		printf("Введите время: ");
+		printf("Р’РІРµРґРёС‚Рµ РІСЂРµРјСЏ: ");
 		scanf("%d:%d", &point[i].hour, &point[i].min);
-		printf("Введите причину перезагрузки: ");
+		printf("Р’РІРµРґРёС‚Рµ РїСЂРёС‡РёРЅСѓ РїРµСЂРµР·Р°РіСЂСѓР·РєРё: ");
 		scanf("%s", &point[i].reason);
-		printf("Введите имя пользователя(Фамилия_Имя): ");
+		printf("Р’РІРµРґРёС‚Рµ РёРјСЏ РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ(Р¤Р°РјРёР»РёСЏ_РРјСЏ): ");
 		scanf("%s", &point[i].name);
 	}
 	size++;
 	return size;
 }
 
-int read(ITEM* point, int size)//чтение 
+int read(ITEM* point, int size)//С‡С‚РµРЅРёРµ 
 {
-	FILE* f; // объявляем переменную 
+	FILE* f; // РѕР±СЉСЏРІР»СЏРµРј РїРµСЂРµРјРµРЅРЅСѓСЋ 
 
 	char b[200];
 
@@ -164,7 +164,7 @@ int read(ITEM* point, int size)//чтение
 
 }
 
-void write(ITEM* point, int size, int n, int q) //функция записи в файл 
+void write(ITEM* point, int size, int n, int q) //С„СѓРЅРєС†РёСЏ Р·Р°РїРёСЃРё РІ С„Р°Р№Р» 
 {
 	FILE* f;
 
@@ -172,10 +172,10 @@ void write(ITEM* point, int size, int n, int q) //функция записи в файл
 	else f = fopen("KP.txt", "a");
 	printf("size---%d\n", size);
 	for (int i = size - n; i < size; i++) {
-		fprintf(f, "%d.%d.%d ", point[i].data[0], point[i].data[1], point[i].data[2]); //дата 
-		fprintf(f, "%d:%d ", point[i].hour, point[i].min); //время 
-		fprintf(f, "%s ", point[i].reason); //причина 
-		fprintf(f, "%s \n", point[i].name); //пользователь 
+		fprintf(f, "%d.%d.%d ", point[i].data[0], point[i].data[1], point[i].data[2]); //РґР°С‚Р° 
+		fprintf(f, "%d:%d ", point[i].hour, point[i].min); //РІСЂРµРјСЏ 
+		fprintf(f, "%s ", point[i].reason); //РїСЂРёС‡РёРЅР° 
+		fprintf(f, "%s \n", point[i].name); //РїРѕР»СЊР·РѕРІР°С‚РµР»СЊ 
 	}
 	fclose(f);
 }
@@ -183,19 +183,19 @@ void write(ITEM* point, int size, int n, int q) //функция записи в файл
 void put(ITEM* point, int size, int one_point) {
 
 	for (int i = 0 + one_point; i < size; i++) {
-		printf("Номер строки  %d\n", i + 1);
-		printf("Дата          %d.%d.%d\n", point[i].data[0], point[i].data[1], point[i].data[2]);
-		printf("Время         %d:%d\n", point[i].hour, point[i].min);
-		printf("Причина       %s\n", point[i].reason);
-		printf("Пользователь  %s\n", point[i].name);
+		printf("РќРѕРјРµСЂ СЃС‚СЂРѕРєРё  %d\n", i + 1);
+		printf("Р”Р°С‚Р°          %d.%d.%d\n", point[i].data[0], point[i].data[1], point[i].data[2]);
+		printf("Р’СЂРµРјСЏ         %d:%d\n", point[i].hour, point[i].min);
+		printf("РџСЂРёС‡РёРЅР°       %s\n", point[i].reason);
+		printf("РџРѕР»СЊР·РѕРІР°С‚РµР»СЊ  %s\n", point[i].name);
 		printf("\n");
 	}
 }
 
 int searchUser(ITEM* point, char* name, int size) {
 	for (int i = 0; i < size; i++) {
-		if (strcmp(name, point[i].name) == 0) { // проверяем строки на соответствие введенным данным 
-			return i; //возвращаем номер 
+		if (strcmp(name, point[i].name) == 0) { // РїСЂРѕРІРµСЂСЏРµРј СЃС‚СЂРѕРєРё РЅР° СЃРѕРѕС‚РІРµС‚СЃС‚РІРёРµ РІРІРµРґРµРЅРЅС‹Рј РґР°РЅРЅС‹Рј 
+			return i; //РІРѕР·РІСЂР°С‰Р°РµРј РЅРѕРјРµСЂ 
 		}
 	}
 	return -1;
@@ -218,7 +218,7 @@ ITEM* del(ITEM* point, int size, int index)
 
 	if (index < 0 || index > size)
 	{
-		printf("строка с номером %d не существует\n", index);
+		printf("СЃС‚СЂРѕРєР° СЃ РЅРѕРјРµСЂРѕРј %d РЅРµ СЃСѓС‰РµСЃС‚РІСѓРµС‚\n", index);
 		return 0;
 	}
 	else {
