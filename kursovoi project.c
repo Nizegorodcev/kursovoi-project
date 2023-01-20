@@ -1,273 +1,356 @@
 #define _CRT_SECURE_NO_DEPRECATE
 #include <stdio.h>
+#include <locale.h>
 #include <string.h>
 #include <malloc.h>
-#include <windows.h>
+#include <time.h>
 #include <stdlib.h>
-#include<locale.h>
 
-typedef struct {
-	int data[3];
+struct Data {
 	int hour;
 	int min;
-	char name[100], reason[100];
-}ITEM;
+	char name[100];
+	char reason[100];
+	struct tm t;
+};
 
-void sort(ITEM* point, int size);
-int compare(const ITEM* a, const ITEM* b);
-int init(ITEM* point, int, int n);
-int read(ITEM* point, int size);
-void write(ITEM* point, int size, int n, int q);
-void put(ITEM* point, int size, int one_point);
-int searchUser(ITEM* point, char* name, int);
-int searchData(ITEM* point, int hour, int min, int size, int b);
-ITEM* del(ITEM* point, int size, int index);
+typedef struct Data ITEM_t;
+
+char* file(char* filename); /*Выбор файла*/
+void init(ITEM_t* point, int i); /*Заполнение одной записи*/
+int size_out_file(char* filename); /*Подсчёт количества записей в файле*/
+ITEM_t* read(ITEM_t* point, char* filename); /* Считывание всех записей из файла*/
+void put(ITEM_t point); /*Вывод одной записи*/
+void write(ITEM_t point, int i, char* filename); /*Запись данных об одной записи в файл*/
+int* searchUser(ITEM_t* point, char* name, int size); /*Поиск по имени, возвращает несколько значений*/
+int searchTime(ITEM_t* point, struct tm time_search, int size); /* Поиск по времени, возвращает одно значение*/
+ITEM_t* del(ITEM_t* point, int size, int index); /*Удаление записи*/
+ITEM_t* sort_insert(ITEM_t* point, int size); /*Сортировка*/
+void tabl(); /*Таблица*/
 
 void main()
 {
 	setlocale(LC_ALL, "RUS");
 	system("chcp 1251");
-	ITEM* point = NULL; // объявление БД
-	int size, v;
-	FILE* f;
-	int file_size, vivod;
+
+	ITEM_t* point = malloc(sizeof(ITEM_t));
+	int size = 0, vibor;
+	char* filename = malloc(30 * sizeof(char));
+
+	filename = file(filename); /*Выбор файла*/
 
 	do {
-		printf("Выберите действие:\n1)Ввод данных пользователя.\n2)Поиск по пользователю.\n3)Вывод.\n4)Поиск по времени.\n5)Удаление записи.\n6)Сортировка.\n0)Выйти из программы.\n");
-		scanf("%d", &v);
+		puts("Выберите действие:");
+		puts("1) Ввод данных пользователя");
+		puts("2) Вывод");
+		puts("3) Поиск по пользователю");
+		puts("4) Поиск по времени");
+		puts("5) Удаление записи");
+		puts("6) Сортировка");
+		puts("7) Сменить файл");
+		puts("0) Выход");
+		scanf("%d", &vibor);
 
-		switch (v) {
-		case 1: { /*Добавить запись*/
+		switch (vibor)
+		{
+		case 1:
+		{
 			int n;
-			printf("Введите кол-во записей: ");
+			printf("Введите количество новых записей\n");
 			scanf("%d", &n);
 
-			f = fopen("Бд.txt", "r");
-			int file_size = 0;
-			while (!feof(f)) {
-				if (fgetc(f) == '\n') file_size++;
-			}
-			size = file_size;
-			printf("%d-----size\n", size);
+			size = size_out_file(filename);
+			point = realloc(point, (size + n + 1) * sizeof(ITEM_t));
+			point = read(point, filename);
 
-			point = (ITEM*)malloc((file_size + 1 + n) * sizeof(ITEM));
-			size = init(point, size, n);
-			printf("%d-----\n", size);
-			write(point, size, n, 0);
+			for (int i = size; i < size + n; i++)
+			{
+				init(point, i);
+				write(point[i], i, filename);
+			}
 			break;
 		}
-		case 2: { /*Поиск по имени*/
+		case 2:
+		{
+			system("cls");
+			size = size_out_file(filename); /*Подсчёт записей в файле*/
+			point = realloc(point, (size + 1) * sizeof(ITEM_t)); //Выделение памяти под записи в файле
+			point = read(point, filename); //Заполнение данными из файла
+
+			for (int i = 0; i < size; i++)
+			{
+				if (i == 0) tabl();
+				printf("|%3d|", i + 1);
+				put(point[i]);
+			}
+			break;
+		}
+		case 3:
+		{
 			char name[100];
-			int ind_res;
-			printf("Укажите имя пользователя: ");
+			int i = 0;
+			int* arr = malloc(size * sizeof(int));
+
+			puts("Введите имя пользователя(Фамилия_имя)");
 			scanf("%s", name);
 
-			ind_res = searchUser(point, name, size);
-			if (ind_res >= 0)put(point, ind_res + 1, ind_res);
-			else printf("Пльзователь не найден.\n");
-			break;
-		}
+			arr = searchUser(point, name, size);
 
-		case 3: { /*Вывод данных*/
-			puts("1. Вывод данных с файла");
-			puts("2. Вывод после сортировки");
-			scanf("%d", &vivod);
-			switch (vivod) {
-			case 1:
-				file_size = 0;
-
-				f = fopen("Бд.txt", "r");
-				while (!feof(f)) {
-					if (fgetc(f) == '\n') file_size++;
-				} size = file_size;
-				point = (ITEM*)malloc(size * sizeof(ITEM));
-
-				size = read(point, size);
-				put(point, size, 0);
-				break;
-
-			case 2:
-				put(point, size, 0);
-				break;
-			}
-
-			break;
-		}
-
-		case 4: { /*Поиск по времени*/
-
-			int hour, min;
-
-			printf("Укажите время(час:минуты): ");
-			scanf("%d:%d", &hour, &min);
-			printf("***************************************************************\n");
-
-			int ind_poisk = -1;
-			for (int u = 0; u < size - 1; u++)
+			while (arr[i] >= 0)
 			{
-				ind_poisk = searchData(point, hour, min, size, ind_poisk + 1);
-
-				if (ind_poisk >= 0)
-					put(point, ind_poisk + 1, ind_poisk);
-
-				if (ind_poisk >= size) break;
-
+				if (i == 0)tabl();
+				printf("|%3d|", i + 1);
+				put(point[arr[i]]);
+				i++;
 			}
 			break;
 		}
+		case 4:
+		{
+			struct tm time_search;
+			int ind;
 
-		case 5: { /*Удаление записи*/
+			puts("Введите время для поиска(__:__)");
+			scanf("%d:%d", &time_search.tm_hour, &time_search.tm_min);
+
+			ind = searchTime(point, time_search, size);
+			if (ind >= 0) {
+				tabl();
+				printf("| 1|");
+				put(point[ind]);
+			}
+			break;
+		}
+		case 5:
+		{
 			int index;
 			printf("Выберите строку которую хотите удалить:");
 			scanf("%d", &index);
-			getchar();
-
-			ITEM* point2 = (ITEM*)malloc(size * sizeof(ITEM));
-			point2 = point;
-
-			point = (ITEM*)malloc((size - 1) * sizeof(ITEM));
-			point = del(point2, size, index);
-
-			write(point, size, size - 1, 1);
+			if (index > size || index < 0) {
+				puts("Такой строки не существует");
+				break;
+			}
+			point = del(point, size, index);
+			size--;
+			for (int i = 0; i < size; i++)
+				write(point[i], i, filename);
 			break;
 		}
-
-		case 6: { /* Сортировка*/
-			sort(point, size);
-			put(point, size, 0);
+		case 6:
+		{
+			sort_insert(point, size);
+			for (int i = 0; i < size; i++)
+			{
+				if (i == 0) tabl();
+				printf("|%3d|", i + 1);
+				put(point[i]);
+			}
+			break;
+		}
+		case 7:
+		{
+			system("cls");
+			filename = file(filename);
 			break;
 		}
 		}
-	} while (v != 0);
+	} while (vibor != 0);
 }
 
-int init(ITEM* point, int size, int n) {
-	for (int i = size; i < size + n; i++) {
-		printf("Введите дату: ");
-		scanf("%d.%d.%d", &point[i].data[0], &point[i].data[1], &point[i].data[2]);
-		printf("Введите время: ");
-		scanf("%d:%d", &point[i].hour, &point[i].min);
-		printf("Введите причину перезагрузки: ");
-		scanf("%s", &point[i].reason);
-		printf("Введите имя пользователя(Фамилия_Имя): ");
-		scanf("%s", &point[i].name);
-	}
-	size++;
-	return size;
-}
-
-int read(ITEM* point, int size)//чтение
+char* file(char* filename)
 {
-	FILE* f; // объявляем переменную
+	int vibor = -2;
+	FILE* f;
+	while (vibor != -1)
+	{
+		puts("Выберите действие:");
+		puts("1) Создать новый файл");
+		puts("2) Открыть существующий файл");
+		scanf("%d", &vibor);
+		if (vibor == 1) {
+			puts("Введите название файла");
+			scanf("%s", filename);
 
+			if (!(f = fopen(filename, "w"))) {
+				puts("Файл уже существует");
+				continue;
+			}
+
+			else {
+				f = fopen(filename, "w");
+				fprintf(f, "");
+				fclose(f);
+				vibor = -1;
+				continue;
+			}
+		}
+		else if (vibor == 2)
+		{
+			puts("Введите название файла");
+			scanf("%s", filename);
+			if (!(f = fopen(filename, "r")))
+			{
+				puts("Файл не найден");
+				continue;
+			}
+			else vibor = -1;
+		}
+		else continue;
+	}
+	return filename;
+}
+
+void init(ITEM_t* point, int i)
+{
+	printf("Введите дату(__:__:____): ");
+	scanf("%d.%d.%d", &point[i].t.tm_mday, &point[i].t.tm_mon, &point[i].t.tm_year);
+	printf("Введите время(__:__): ");
+	scanf("%d:%d", &point[i].hour, &point[i].min);
+	printf("Введите причину перезагрузки: ");
+	scanf("%s", &point[i].reason);
+	printf("Введите имя пользователя(Фамилия_Имя): ");
+	scanf("%s", &point[i].name);
+}
+
+ITEM_t* read(ITEM_t* point, char* filename)
+{
+	FILE* f = fopen(filename, "r");
+	int ind = 0;
 	char b[200];
 
-	f = fopen("Бд.txt", "r");
-	int ind = 0;
-	if (f != NULL)
-	{
-		while (!feof(f)) {
-			fgets(b, 200, f);
-			if (b[0] == '\n') continue;
-
+	while (!feof(f)) {
+		fgets(b, 200, f);
+		if (b[0] == '\n') continue;
+		else {
 			sscanf(b, "%d.%d.%d %d:%d %s %s",
-				&point[ind].data[0],
-				&point[ind].data[1],
-				&point[ind].data[2],
+				&point[ind].t.tm_mday,
+				&point[ind].t.tm_mon,
+				&point[ind].t.tm_year,
 				&point[ind].hour,
 				&point[ind].min,
 				point[ind].reason,
 				point[ind].name);
+
 			ind++;
 		}
-		return size;
 	}
-	else printf("Файл не удалось открыть");
+	return point;
 }
 
-void write(ITEM* point, int
-	size, int n, int q) //функция записи в файл
+int size_out_file(char* filename)
+{
+	int s = 0;
+	FILE* f = fopen(filename, "r");
+	while (!feof(f))
+		if (fgetc(f) == '\n' && fgetc(f) != ' ') s++;
+
+	return s;
+}
+
+void put(ITEM_t point)
+{
+	printf(" %2d.%2d.%2d |", point.t.tm_mday, point.t.tm_mon, point.t.tm_year);
+	printf(" %2d:%2d |", point.hour, point.min);
+	printf("%29s|", point.reason);
+	printf("%41s|", point.name);
+	printf("\n");
+	puts("----------------------------------------------------------------------------------------------------");
+}
+
+void write(ITEM_t point, int i, char* filename)
 {
 	FILE* f;
-	if (size == 0 || q == 1)f = fopen("Бд.txt", "w");
-	else f = fopen("Бд.txt", "a");
-	printf("size---%d\n", size);
-	for (int i = size - n; i < size; i++) {
-		fprintf(f, "%d.%d.%d ", point[i].data[0], point[i].data[1], point[i].data[2]); //дата
-		fprintf(f, "%d:%d ", point[i].hour, point[i].min); //время
-		fprintf(f, "%s ", point[i].reason); //причина
-		fprintf(f, "%s \n", point[i].name); //пользователь
-	}
+	if (i == 0) f = fopen(filename, "w");
+	else f = fopen(filename, "a");
+
+	fprintf(f, "%d.%d.%d ", point.t.tm_mday, point.t.tm_mon, point.t.tm_year); //дата
+	fprintf(f, "%d:%d ", point.hour, point.min); //время
+	fprintf(f, "%s ", point.reason); //причина
+	fprintf(f, "%s \n", point.name); //пользователь
+
 	fclose(f);
 }
 
-void put(ITEM* point, int size, int one_point) {
+int* searchUser(ITEM_t* point, char* name, int size) {
+	int count = 0;
+	int* arr = (int*)malloc(size * sizeof(int));
 
-	for (int i = 0 + one_point; i < size; i++) {
-		printf("Номер строки %d\n", i + 1);
-		printf("Дата %d.%d.%d\n", point[i].data[0], point[i].data[1], point[i].data[2]);
-		printf("Время %2d:%02d\n", point[i].hour, point[i].min);
-		printf("Причина %s\n", point[i].reason);
-		printf("Пользователь %s\n", point[i].name);
-		printf("\n");
+	for (int i = 0; i < size; i++) {
+		if (strcmp(name, point[i].name) == 0) {
+			arr[count] = i;
+			count++;
+		}
+	}
+	if (count > 0) return arr;
+	else {
+		free(arr);
+		return arr;
 	}
 }
 
-int searchUser(ITEM* point, char* name, int size) {
+int searchTime(ITEM_t* point, struct tm time_search, int size) {
 	for (int i = 0; i < size; i++) {
-		if (strcmp(name, point[i].name) == 0) { // проверяем строки на соответствие введенным данным
-			return i; //возвращаем номер
-		}
+		if (time_search.tm_hour == point[i].hour && time_search.tm_min == point[i].min)
+			return i;
 	}
 	return -1;
 }
 
-int searchData(ITEM* point, int hour, int min, int size, int b) {
-
-	for (int i = b; i < size; i++) {
-		if (hour == point[i].hour && min == point[i].min)
-			return i;
-	}
-	return -2;
-}
-
-ITEM* del(ITEM* point, int size, int index)
+ITEM_t* del(ITEM_t* point, int size, int index)
 {
-	size = read(point, size);
+	index--;
 
-	ITEM* list = (ITEM*)malloc(size - 1 * (sizeof(ITEM)));
-
-	if (index < 0 || index > size)
+	for (int i = 0; i < size; i++)
 	{
-		printf("строка с номером %d не существует\n", index);
-		return 0;
-	}
-	else {
-		for (int i = 0; i < size; i++)
-		{
-			if (i != index || i < index) {
-				continue;
-			}
-			else if (i == index || i >= index) {
-				*(point + i) = *(point + i + 1);
-			}
+		if (i < index) continue;
+		else {
+			*(point + i) = *(point + i + 1);
 		}
-		return point;
 	}
+	return point;
 }
 
-int compare(const ITEM* a, const ITEM* b) {
-	if (strcmp(a->reason, b->reason) > 0) return 1;
-	if (strcmp(a->reason, b->reason) < 0) return -1;
-
-	if (a->data[0] > b->data[0]) return 1;
-	if (a->data[0] < b->data[0]) return -1;
-
-	if (a->data[1] > b->data[1]) return 1;
-	if (a->data[1] < b->data[1]) return -1;
-	return 0;
+ITEM_t* sort_insert(ITEM_t* point, int size) {
+	char temp[120];
+	char r[120];
+	int a, b, c, h, m;
+	int j;
+	for (int i = 1; i < size - 1; i++)
+	{
+		a = point[i].t.tm_mday;
+		b = point[i].t.tm_mon;
+		c = point[i].t.tm_year;
+		h = point[i].hour;
+		m = point[i].min;
+		strcpy(temp, point[i].reason);
+		strcpy(r, point[i].name);
+		j = i;
+		if (strcmp(point[j - 1].reason, temp) > 0 && j > 0) {
+			strcpy(point[j].reason, point[j - 1].reason);
+			strcpy(point[j].name, point[j - 1].name);
+			point[j - 1].t.tm_mday = point[j].t.tm_mday;
+			point[j - 1].t.tm_mon = point[j].t.tm_mon;
+			point[j - 1].t.tm_year = point[j].t.tm_year;
+			point[j - 1].hour = point[j].hour;
+			point[j - 1].min = point[j].min;
+			j--;
+		}
+		else {
+			strcpy(point[j].reason, temp);
+			point[j].t.tm_mday = a;
+			point[j].t.tm_mon = b;
+			point[j].t.tm_year = c;
+			point[j].hour = h;
+			point[j].min = m;
+			strcpy(point[j].name, r);
+		}
+	}
+	return point;
 }
 
-void sort(ITEM* point, int size) {
-	qsort(point, size, sizeof(ITEM), compare);
+void tabl()
+{
+	puts("----------------------------------------------------------------------------------------------------");
+	puts("| # | Дата | Время | Причина | Фамилия_Имя |");
+	puts("----------------------------------------------------------------------------------------------------");
 }
