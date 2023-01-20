@@ -216,7 +216,6 @@ ITEM_t* read(ITEM_t* point, char* filename)
 	FILE* f = fopen(filename, "r");
 	int ind = 0;
 	char b[200];
-
 	while (!feof(f)) {
 		fgets(b, 200, f);
 		if (b[0] == '\n') continue;
@@ -269,7 +268,6 @@ void write(ITEM_t point, int i, char* filename)
 
 	fclose(f);
 }
-
 int* searchUser(ITEM_t* point, char* name, int size) {
 	int count = 0;
 	int* arr = (int*)malloc(size * sizeof(int));
@@ -286,7 +284,6 @@ int* searchUser(ITEM_t* point, char* name, int size) {
 		return arr;
 	}
 }
-
 int searchTime(ITEM_t* point, struct tm time_search, int size) {
 	for (int i = 0; i < size; i++) {
 		if (time_search.tm_hour == point[i].hour && time_search.tm_min == point[i].min)
@@ -327,26 +324,23 @@ ITEM_t* sort_insert(ITEM_t* point, int size) {
 		if (strcmp(point[j - 1].reason, temp) > 0 && j > 0) {
 			strcpy(point[j].reason, point[j - 1].reason);
 			strcpy(point[j].name, point[j - 1].name);
-			point[j - 1].t.tm_mday = point[j].t.tm_mday;
-			point[j - 1].t.tm_mon = point[j].t.tm_mon;
-			point[j - 1].t.tm_year = point[j].t.tm_year;
-			point[j - 1].hour = point[j].hour;
-			point[j - 1].min = point[j].min;
+			point[j].t.tm_mday = point[j - 1].t.tm_mday;
+			point[j].t.tm_mon = point[j - 1].t.tm_mon;
+			point[j].t.tm_year = point[j - 1].t.tm_year;
+			point[j].hour = point[j - 1].hour;
+			point[j].min = point[j - 1].min;
+			strcpy(point[j - 1].reason, temp);
+			strcpy(point[j - 1].name, r);
+			point[j - 1].t.tm_mday = a;
+			point[j - 1].t.tm_mon = b;
+			point[j - 1].t.tm_year = c;
+			point[j - 1].hour = h;
+			point[j - 1].min = m;
 			j--;
-		}
-		else {
-			strcpy(point[j].reason, temp);
-			point[j].t.tm_mday = a;
-			point[j].t.tm_mon = b;
-			point[j].t.tm_year = c;
-			point[j].hour = h;
-			point[j].min = m;
-			strcpy(point[j].name, r);
 		}
 	}
 	return point;
 }
-
 void tabl()
 {
 	puts("----------------------------------------------------------------------------------------------------");
