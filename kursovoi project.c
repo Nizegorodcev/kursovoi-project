@@ -15,7 +15,6 @@ struct Data {
 };
 
 typedef struct Data ITEM_t;
-
 char* file(char* filename); /*Выбор файла*/
 void init(ITEM_t* point, int i); /*Заполнение одной записи*/
 int size_out_file(char* filename); /*Подсчёт количества записей в файле*/
@@ -263,7 +262,7 @@ void write(ITEM_t point, int i, char* filename)
 	if (i == 0) f = fopen(filename, "w");
 	else f = fopen(filename, "a");
 
-	fprintf(f, "%d.%d.%d ", point.t.tm_mday, point.t.tm_mon, point.t.tm_year); //дата
+	fprintf(f, "%2d.%2d.%2d ", point.t.tm_mday, point.t.tm_mon, point.t.tm_year); //дата
 	fprintf(f, "%d:%d ", point.hour, point.min); //время
 	fprintf(f, "%s ", point.reason); //причина
 	fprintf(f, "%s \n", point.name); //пользователь
@@ -351,7 +350,6 @@ ITEM_t* sort_insert(ITEM_t* point, int size) {
 void tabl()
 {
 	puts("----------------------------------------------------------------------------------------------------");
-	puts("| # | Дата | Время | Причина | Фамилия_Имя |");
+	puts("| # |     Дата   | Время |           Причина           |               Фамилия_Имя               |");
 	puts("----------------------------------------------------------------------------------------------------");
 }
-//.
